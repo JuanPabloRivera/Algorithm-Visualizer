@@ -5,7 +5,7 @@ from sort_board import SortBoard
 
 class SortFrame(tk.Frame):
     def __init__(self, parent, width, height, showMain, showPathFinding):
-        super().__init__(parent, width=width, height=height, background='green')
+        super().__init__(parent, width=width, height=height)
 
         self.rowconfigure(0, weight=1)
 

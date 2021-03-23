@@ -6,7 +6,7 @@ from time import sleep
 
 class SortBoard(tk.Canvas):
     def __init__(self, parent):
-        super().__init__(parent, width=int(parent.cget('width')), height=(int(parent.cget('height'))*0.90)//1, background='black')
+        super().__init__(parent, width=int(parent.cget('width')), height=(int(parent.cget('height'))*0.85)//1, background='black')
    
         self.parent = parent
         self.numberData = 10;

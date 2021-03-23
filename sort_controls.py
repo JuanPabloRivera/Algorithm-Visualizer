@@ -3,7 +3,7 @@ from tkinter import ttk
 
 class SortControls(tk.Frame):
     def __init__(self, parent, showMain, showPathFinding):
-        super().__init__(parent, width=int(parent.cget('width')), height=(int(parent.cget('height'))*0.10)//1, background='red')
+        super().__init__(parent, width=int(parent.cget('width')), height=(int(parent.cget('height'))*0.15)//1, background='red')
 
         padx=20
         self.parent = parent
