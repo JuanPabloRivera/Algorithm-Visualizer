@@ -6,8 +6,8 @@ from time import sleep
 
 class SortBoard(tk.Canvas):
     def __init__(self, parent):
-        super().__init__(width=1800, height=1000, background='black')
-
+        super().__init__(parent, width=int(parent.cget('width')), height=(int(parent.cget('height'))*0.90)//1, background='black')
+   
         self.parent = parent
         self.numberData = 10;
         self.sortingMethod = 'Bubble Sort'
@@ -69,17 +69,20 @@ class SortBoard(tk.Canvas):
 
                 self.itemconfig(self.rectangles[i], fill='red')
                 self.update()
+
                 if (self.data[i] > self.data[i+1]):
                     isSorted = False
                     self.__swap(i, i+1)
+
                 else: self.itemconfig(self.rectangles[i], fill='white') 
                 sleep(1/self.numberData**2)
-        self.parent.controls.generateButton['state'] = 'normal'
+
+        self.parent.sortControls.generateButton['state'] = 'normal'
         return 
 
     def __quickSort(self):
         self.__actualQuickSort(0, len(self.data)-1)  
-        self.parent.controls.generateButton['state'] = 'normal'
+        self.parent.sortControls.generateButton['state'] = 'normal'
         return
 
     def __actualQuickSort(self, left, right):
@@ -100,10 +103,12 @@ class SortBoard(tk.Canvas):
 
             self.itemconfig(self.rectangles[j], fill='red')
             self.update()
+            
             if (self.data[j] <= pivot):
                 i += 1
                 self.__swap(i, j)
-            sleep(1/self.numberData**2)
+
+            sleep(1/self.numberData)
             self.itemconfig(self.rectangles[j], fill='white')
             
         self.__swap(i+1, right)
@@ -112,7 +117,7 @@ class SortBoard(tk.Canvas):
     def __mergeSort(self):
         merged = [0 for _ in self.data]
         self.__actualMergeSort(merged, 0, len(self.data)-1)
-        self.parent.controls.generateButton['state'] = 'normal'
+        self.parent.sortControls.generateButton['state'] = 'normal'
         return
 
     def __actualMergeSort(self, container, left, right):
@@ -158,5 +163,5 @@ class SortBoard(tk.Canvas):
             self.coords(self.rectangles[j], x0, int(self.cget('height')) - rectangleHeight*self.data[j], x1, y1)
             self.itemconfig(self.rectangles[j], fill='red')
             self.update()
-            sleep(1/self.numberData**2)
+            sleep(1/self.numberData)
             self.itemconfig(self.rectangles[j], fill='white')

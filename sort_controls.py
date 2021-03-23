@@ -1,12 +1,15 @@
 import tkinter as tk
 from tkinter import ttk
 
-class Controls(tk.Frame):
-    def __init__(self, parent):
-        super().__init__(parent, background='red')
+class SortControls(tk.Frame):
+    def __init__(self, parent, showMain, showPathFinding):
+        super().__init__(parent, width=int(parent.cget('width')), height=(int(parent.cget('height'))*0.10)//1, background='red')
 
-        padx = 20
+        padx=20
         self.parent = parent
+
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
 
         numberLabel = ttk.Label(self, text='Number of points: ')
         numberLabel.grid(row=0, column=0, sticky='EW', padx=padx)
@@ -30,17 +33,23 @@ class Controls(tk.Frame):
         self.stopButton = ttk.Button(self, text='Stop', cursor='hand2', command=self.__stopCommand, state='disabled')
         self.stopButton.grid(row=1, column=3, columnspan=2, sticky='EW', padx=padx)
 
+        self.mainButton = ttk.Button(self, text='Main Menu', cursor='hand2', command=showMain, state='normal')
+        self.mainButton.grid(row=0, column=6, sticky='EW', padx=padx)
+        
+        self.pathFindingButton = ttk.Button(self, text='Path Finding', cursor='hand2', command=showPathFinding, state='normal')
+        self.pathFindingButton.grid(row=1, column=6, sticky='EW', padx = padx)
+
     def __generateCommand(self):
         self.sortButton['state'] = 'normal'
-        self.parent.board.generate(self.numberBox.get())
+        self.parent.sortBoard.generate(self.numberBox.get())
 
     def __sortCommand(self):
         self.generateButton['state'] = 'disabled'
         self.stopButton['state'] = 'normal'
-        self.parent.board.sorting = True
-        self.parent.board.sortData(self.methodBox.get())
+        self.parent.sortBoard.sorting = True
+        self.parent.sortBoard.sortData(self.methodBox.get())
 
     def __stopCommand(self):
         self.generateButton['state'] = 'normal'
-        self.parent.board.sorting = False
+        self.parent.sortBoard.sorting = False
         
