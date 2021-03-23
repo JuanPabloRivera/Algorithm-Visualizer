@@ -27,7 +27,7 @@ class Controls(tk.Frame):
         self.sortButton = ttk.Button(self, text='Sort', cursor='hand2', command=self.__sortCommand, state='disabled')
         self.sortButton.grid(row=1, column=0, columnspan=3, sticky='EW', padx=padx)
 
-        self.stopButton = ttk.Button(self, text='Stop', cursor='hand2', state='disabled')
+        self.stopButton = ttk.Button(self, text='Stop', cursor='hand2', command=self.__stopCommand, state='disabled')
         self.stopButton.grid(row=1, column=3, columnspan=2, sticky='EW', padx=padx)
 
     def __generateCommand(self):

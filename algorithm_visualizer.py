@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from board import SortBoard
+from sort_board import SortBoard
 from controls import Controls
 
 class Algorithm_Visualizer(tk.Tk):

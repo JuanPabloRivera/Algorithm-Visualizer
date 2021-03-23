@@ -64,6 +64,9 @@ class SortBoard(tk.Canvas):
         while not isSorted:
             isSorted = True
             for i in range(len(self.data)-1):
+                #If stop button is pressed
+                if not self.sorting: return
+
                 self.itemconfig(self.rectangles[i], fill='red')
                 self.update()
                 if (self.data[i] > self.data[i+1]):
@@ -82,8 +85,9 @@ class SortBoard(tk.Canvas):
     def __actualQuickSort(self, left, right):
         if right > left:
             index = self.__partition(left, right)
-            self.__actualQuickSort(left, index-1)
-            self.__actualQuickSort(index+1, right)
+            if (index != -1):   #If stop button was pressed
+                self.__actualQuickSort(left, index-1)
+                self.__actualQuickSort(index+1, right)
         return
 
     def __partition(self, left, right):
@@ -91,6 +95,9 @@ class SortBoard(tk.Canvas):
         i = left-1
 
         for j in range(left, right):
+            #If stop button is pressed
+            if not self.sorting: return -1
+
             self.itemconfig(self.rectangles[j], fill='red')
             self.update()
             if (self.data[j] <= pivot):
@@ -142,6 +149,8 @@ class SortBoard(tk.Canvas):
             c += 1
 
         for j in range(start, rightEnd+1):
+            #If stop button is pressed
+            if not self.sorting: return
 
             (x0, y0, x1, y1) = self.coords(self.rectangles[j])
             rectangleHeight = (int(self.cget('height')) - y0) // self.data[j]
