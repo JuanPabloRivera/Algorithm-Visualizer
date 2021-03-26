@@ -4,9 +4,18 @@ import queue
 import math
 from time import sleep
 
+DARK_ORANGE = '#ec7014'
+LIGHT_ORANGE = '#f6a437'
+YELLOW = '#ffd366'
+DARK_GRAY = '#758a9b'
+LIGHT_GRAY = '#b0b0b0'
+DARK_BLUE = '#042f64'
+
 class PathFindingBoard(tk.Canvas):
     def __init__(self, parent):
         super().__init__(parent, width=int(parent.cget('width')), height=(int(parent.cget('height'))*0.85)//1, background='white')
+
+        self.parent = parent
 
         self.findingMethod = "Breath First Search"
         self.finding = False
@@ -22,9 +31,9 @@ class PathFindingBoard(tk.Canvas):
         self.data = [[0 for _ in range(self.xNumberSquares)] for _ in range(self.yNumberSquares)]
         self.data[self.yStart][self.xStart] = 1
         self.data[self.yEnd][self.xEnd] = -1
-        self.squares = [[self.create_rectangle(self.squareSize*x, self.squareSize*y, self.squareSize*x + self.squareSize, self.squareSize*y + self.squareSize, fill='white', activefill='#bdd0db', activewidth=2) for x in range(self.xNumberSquares)] for y in range(self.yNumberSquares)]
-        self.itemconfig(self.squares[self.yStart][self.xStart], fill='green')
-        self.itemconfig(self.squares[self.yEnd][self.xEnd], fill='red')
+        self.squares = [[self.create_rectangle(self.squareSize*x, self.squareSize*y, self.squareSize*x + self.squareSize, self.squareSize*y + self.squareSize, fill='white', activefill=LIGHT_GRAY, activewidth=2) for x in range(self.xNumberSquares)] for y in range(self.yNumberSquares)]
+        self.itemconfig(self.squares[self.yStart][self.xStart], fill=YELLOW)
+        self.itemconfig(self.squares[self.yEnd][self.xEnd], fill=DARK_ORANGE)
         
         self.clickPressed = False
         self.clearing = False
@@ -38,12 +47,12 @@ class PathFindingBoard(tk.Canvas):
         for i in range(len(self.squares)):
             for j in range(len(self.squares[0])):
                 self.data[i][j] = 0
-                self.itemconfig(self.squares[i][j], fill='white', activefill='#bdd0db', activewidth=2)
+                self.itemconfig(self.squares[i][j], fill='white', activefill=LIGHT_GRAY, activewidth=2)
 
         self.data[self.yStart][self.xStart] = 1
         self.data[self.yEnd][self.xEnd] = -1
-        self.itemconfig(self.squares[self.yStart][self.xStart], fill='green', activefill='', activewidth=1)
-        self.itemconfig(self.squares[self.yEnd][self.xEnd], fill='red', activefill='', activewidth=1)
+        self.itemconfig(self.squares[self.yStart][self.xStart], fill=YELLOW, activefill='', activewidth=1)
+        self.itemconfig(self.squares[self.yEnd][self.xEnd], fill=DARK_ORANGE, activefill='', activewidth=1)
 
     def __onPress(self, event):
         self.clickPressed = True
@@ -71,26 +80,26 @@ class PathFindingBoard(tk.Canvas):
 
             if self.settingStart:
                 self.data[self.yStart][self.xStart] = 0
-                self.itemconfig(self.squares[self.yStart][self.xStart], fill='white', activefill='#bdd0db')
+                self.itemconfig(self.squares[self.yStart][self.xStart], fill='white', activefill=LIGHT_GRAY)
                 self.xStart = event.x // self.squareSize
                 self.yStart = event.y // self.squareSize
                 self.data[self.yStart][self.xStart] = 1
-                self.itemconfig(self.squares[ySquare][xSquare], fill='green', activefill='')
+                self.itemconfig(self.squares[ySquare][xSquare], fill=YELLOW, activefill='')
 
             elif self.settingEnd:
                 self.data[self.yEnd][self.xEnd] = 0
-                self.itemconfig(self.squares[self.yEnd][self.xEnd], fill='white', activefill='#bdd0db')
+                self.itemconfig(self.squares[self.yEnd][self.xEnd], fill='white', activefill=LIGHT_GRAY)
                 self.xEnd = event.x // self.squareSize 
                 self.yEnd = event.y // self.squareSize
                 self.data[self.yEnd][self.xEnd] = 2
-                self.itemconfig(self.squares[ySquare][xSquare], fill='red', activefill='')
+                self.itemconfig(self.squares[ySquare][xSquare], fill=DARK_ORANGE, activefill='')
 
             elif ((xSquare != self.xStart or ySquare != self.yStart) and (xSquare != self.xEnd or ySquare != self.yEnd)):
                 if self.clearing:
-                    self.itemconfig(self.squares[ySquare][xSquare], fill='white', activefill='#bdd0db')
+                    self.itemconfig(self.squares[ySquare][xSquare], fill='white', activefill=LIGHT_GRAY)
                     self.data[ySquare][xSquare] = 0
                 else:
-                    self.itemconfig(self.squares[ySquare][xSquare], fill='#042f64', activefill='')
+                    self.itemconfig(self.squares[ySquare][xSquare], fill=DARK_BLUE, activefill='')
                     self.data[ySquare][xSquare] = math.inf
 
     def find(self, method):
@@ -105,6 +114,8 @@ class PathFindingBoard(tk.Canvas):
     def __bfs(self):
         prev = self.__bfsSolve()
         self.__bfsReconstructPath(prev)
+        self.finding = False
+        self.parent.pathFindingControls.clearButton['state'] = 'normal'
 
     def __bfsSolve(self):
         prev = [[[None, None] for _ in range(self.xNumberSquares)] for _ in range(self.yNumberSquares)]
@@ -116,7 +127,9 @@ class PathFindingBoard(tk.Canvas):
 
         while (not q.empty()):
             current = q.get()
-            self.itemconfig(self.squares[current[0]][current[1]], fill='yellow')
+            if (current != [self.yStart, self.xStart]):
+                self.itemconfig(self.squares[current[0]][current[1]], fill=LIGHT_GRAY)
+                
             for i in range(4):
                 newRow = current[0] + rowVals[i]
                 newCol = current[1] + colVals[i]
@@ -128,7 +141,7 @@ class PathFindingBoard(tk.Canvas):
                         prev[newRow][newCol] = [current[0], current[1]]
                         q.put([newRow, newCol])
                         self.data[newRow][newCol] = 1
-                        self.itemconfig(self.squares[newRow][newCol], fill='blue')
+                        self.itemconfig(self.squares[newRow][newCol], fill=DARK_GRAY)
             self.update()
         return []
 
@@ -144,7 +157,7 @@ class PathFindingBoard(tk.Canvas):
             
             # Painting the solution path in the board
             for [y, x] in path:
-                self.itemconfig(self.squares[y][x], fill='green') 
+                self.itemconfig(self.squares[y][x], fill=LIGHT_ORANGE) 
                 self.update()
                 sleep(0.01)
 
