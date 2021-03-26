@@ -1,5 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
+import queue
+import math
+from time import sleep
 
 class PathFindingBoard(tk.Canvas):
     def __init__(self, parent):
@@ -16,7 +19,9 @@ class PathFindingBoard(tk.Canvas):
         self.xEnd = self.xNumberSquares - 2
         self.yEnd = self.yNumberSquares - 2
         
-        self.data = [[1 for _ in range(self.xNumberSquares)] for _ in range(self.yNumberSquares)]
+        self.data = [[0 for _ in range(self.xNumberSquares)] for _ in range(self.yNumberSquares)]
+        self.data[self.yStart][self.xStart] = 1
+        self.data[self.yEnd][self.xEnd] = -1
         self.squares = [[self.create_rectangle(self.squareSize*x, self.squareSize*y, self.squareSize*x + self.squareSize, self.squareSize*y + self.squareSize, fill='white', activefill='#bdd0db', activewidth=2) for x in range(self.xNumberSquares)] for y in range(self.yNumberSquares)]
         self.itemconfig(self.squares[self.yStart][self.xStart], fill='green')
         self.itemconfig(self.squares[self.yEnd][self.xEnd], fill='red')
@@ -32,8 +37,11 @@ class PathFindingBoard(tk.Canvas):
     def generate(self):
         for i in range(len(self.squares)):
             for j in range(len(self.squares[0])):
+                self.data[i][j] = 0
                 self.itemconfig(self.squares[i][j], fill='white', activefill='#bdd0db', activewidth=2)
 
+        self.data[self.yStart][self.xStart] = 1
+        self.data[self.yEnd][self.xEnd] = -1
         self.itemconfig(self.squares[self.yStart][self.xStart], fill='green', activefill='', activewidth=1)
         self.itemconfig(self.squares[self.yEnd][self.xEnd], fill='red', activefill='', activewidth=1)
 
@@ -46,7 +54,7 @@ class PathFindingBoard(tk.Canvas):
             self.settingStart = True
         elif xSquare == self.xEnd and ySquare == self.yEnd:
             self.settingEnd = True
-        elif self.data[ySquare][xSquare]:
+        elif not self.data[ySquare][xSquare]:
             self.clearing = False
         else:
             self.clearing = True
@@ -62,22 +70,84 @@ class PathFindingBoard(tk.Canvas):
             ySquare = event.y // self.squareSize
 
             if self.settingStart:
+                self.data[self.yStart][self.xStart] = 0
                 self.itemconfig(self.squares[self.yStart][self.xStart], fill='white', activefill='#bdd0db')
                 self.xStart = event.x // self.squareSize
                 self.yStart = event.y // self.squareSize
+                self.data[self.yStart][self.xStart] = 1
                 self.itemconfig(self.squares[ySquare][xSquare], fill='green', activefill='')
 
             elif self.settingEnd:
+                self.data[self.yEnd][self.xEnd] = 0
                 self.itemconfig(self.squares[self.yEnd][self.xEnd], fill='white', activefill='#bdd0db')
                 self.xEnd = event.x // self.squareSize 
                 self.yEnd = event.y // self.squareSize
+                self.data[self.yEnd][self.xEnd] = 2
                 self.itemconfig(self.squares[ySquare][xSquare], fill='red', activefill='')
 
             elif ((xSquare != self.xStart or ySquare != self.yStart) and (xSquare != self.xEnd or ySquare != self.yEnd)):
                 if self.clearing:
                     self.itemconfig(self.squares[ySquare][xSquare], fill='white', activefill='#bdd0db')
-                    self.data[ySquare][xSquare] = 1
+                    self.data[ySquare][xSquare] = 0
                 else:
                     self.itemconfig(self.squares[ySquare][xSquare], fill='#042f64', activefill='')
-                    self.data[ySquare][xSquare] = 0
+                    self.data[ySquare][xSquare] = math.inf
+
+    def find(self, method):
+        self.findingMethod = method
+        if method == "Breath First Search":
+            self.__bfs()
+        elif method == "Dijkstra's":
+            pass
+        elif method == "A*":
+            pass
+
+    def __bfs(self):
+        prev = self.__bfsSolve()
+        self.__bfsReconstructPath(prev)
+
+    def __bfsSolve(self):
+        prev = [[[None, None] for _ in range(self.xNumberSquares)] for _ in range(self.yNumberSquares)]
+        q = queue.Queue()
+        q.put([self.yStart, self.xStart])
+
+        rowVals = [-1, 1, 0, 0]
+        colVals = [0, 0, -1, 1]
+
+        while (not q.empty()):
+            current = q.get()
+            self.itemconfig(self.squares[current[0]][current[1]], fill='yellow')
+            for i in range(4):
+                newRow = current[0] + rowVals[i]
+                newCol = current[1] + colVals[i]
+                if (0 <= newRow < self.yNumberSquares) and (0 <= newCol < self.xNumberSquares):
+                    if (self.data[newRow][newCol] == -1): #Reached destination
+                        prev[self.yEnd][self.xEnd] = [current[0], current[1]]
+                        return prev
+                    if (self.data[newRow][newCol] not in [1, math.inf]): #Hasn´t been visited and is not a wall
+                        prev[newRow][newCol] = [current[0], current[1]]
+                        q.put([newRow, newCol])
+                        self.data[newRow][newCol] = 1
+                        self.itemconfig(self.squares[newRow][newCol], fill='blue')
+            self.update()
+        return []
+
+    def __bfsReconstructPath(self, prev):
+        if len(prev) != 0:     # If a path was found
+            current = [self.yEnd, self.xEnd]
+            path = [current]
+            while(current != [self.yStart, self.xStart]):
+                next = prev[current[0]][current[1]]
+                path.append(next)
+                current = next
+            path.reverse()
+            
+            # Painting the solution path in the board
+            for [y, x] in path:
+                self.itemconfig(self.squares[y][x], fill='green') 
+                self.update()
+                sleep(0.01)
+
+
+        
                 
