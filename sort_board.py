@@ -160,8 +160,8 @@ class SortBoard(tk.Canvas):
             (x0, y0, x1, y1) = self.coords(self.rectangles[j])
             rectangleHeight = (int(self.cget('height')) - y0) // self.data[j]
             self.data[j] = container[j]
-            self.coords(self.rectangles[j], x0, int(self.cget('height')) - rectangleHeight*self.data[j], x1, y1)
             self.itemconfig(self.rectangles[j], fill='red')
+            self.coords(self.rectangles[j], x0, int(self.cget('height')) - rectangleHeight*self.data[j], x1, y1)
             self.update()
             sleep(1/self.numberData)
             self.itemconfig(self.rectangles[j], fill='white')
